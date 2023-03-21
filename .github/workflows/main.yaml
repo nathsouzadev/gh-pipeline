@@ -66,6 +66,9 @@ jobs:
     - name: Check running container
       run: docker ps -a
 
+    - name: Running migrations
+      run: yarn seed:db
+
     - name: Running funcional tests
       run: yarn test:func
 
