@@ -21,7 +21,7 @@
     "test:e2e": "jest --config ./test/e2e/jest-e2e.json",
     "test:func": "jest --config ./test/func/jest.json",
     "db": "docker-compose up -d",
-    "seed:db": "npx prisma db seed",
+    "seed:db": "npx prisma migrate dev --name init && npx prisma db seed",
     "local": "yarn db && npx prisma migrate dev --name init",
     "ci:stage": "yarn test && npx prisma migrate dev --name init && yarn test:func"
   },
