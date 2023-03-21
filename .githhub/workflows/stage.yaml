@@ -1,0 +1,67 @@
+name: Stage checks
+
+on:
+  push:
+    branches:
+      - stage
+  pull_request:
+    branches:
+      - stage
+      
+env:
+  ## Sets environment variable
+  PORT: 5000
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Install dependencies
+      run: yarn --frozen-lockfile
+
+    - name: Run unit tests
+      run: yarn test
+  
+  funcional:
+    if: ${{ always() && contains(join(needs.*.result, ','), 'success') }}
+    needs: [test]
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Install dependencies
+      run: yarn --frozen-lockfile
+
+    - name: Creating network
+      run: docker network create "microservice-network"
+
+    - name: Build docker-composer
+      run: docker-compose up -d
+
+    - name: Check running container
+      run: docker ps -a
+
+    - name: Running funcional tests
+      run: yarn test:func
